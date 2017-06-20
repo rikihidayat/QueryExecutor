@@ -50,9 +50,11 @@ class _Config(object):
     # ms unit
     max_delay = 30000
 
-    # searching mode for mongo
-    # exact: only values with exact match with query will be displayed
-    # partial: values with partial match with query will be displayed
+    """
+    searching mode for mongo
+    exact: only values with exact match with query will be displayed
+    partial: values with partial match with query will be displayed
+    """
     exact_mode = 'exact'
     partial_mode = 'partial'
     search_mode = (exact_mode, partial_mode)
@@ -72,13 +74,13 @@ class _Config(object):
     """
     query mode for mysql
     """
-    # cari data yang diawalin dengan kata X
+    # quering data starts with X
     startswith_mode = 'startswith'
-    # cari data yang diakhiri dengan kata X
+    # quering data ends with X
     endswith_mode = 'endswith'
-    # cari data yang mengandung dengan kata X
+    # quering data that contain X
     contain_mode = 'contain'
-    # cari data yang sama dengan kata X
+    # quering data that equal with X
     equal_mode = 'equal'
 
 
@@ -122,12 +124,14 @@ class QueEx:
     def mongo_query(self, fields, logical):
         """
         @type fields: dict of tuple
-        @param fields: key merupkan kolom dalam tabel, dan value-nya merupakan
-            tuple yang bersisi:
-            0: nilai yang akan dicari di kolom tersebut
-            1: mode pencarian, exact|partial
+        @param fields: key is a key in collection rows, and its value is:
+            tuple with following format:
+            0: search value for its key
+            1: search mode, fill with exact|partial 
+                *read searching mode for mongo in _Config class*
         @type logical: str
         @param logical: $or|$and
+                        *read query logical for mongo in _Config class*
         """
         if logical not in _Config.logical:
             raise Exception('Unknown logical "%s"' % logical)
@@ -168,18 +172,18 @@ class QueEx:
         """
         @type select: str | list
         @param select:
-            string * > akan mengambil semua kolom
-            string nama_kolom > hanya akan mengambil 1 kolom saja sesuai dengan nama_kolom
-            list > sebutkan nama_kolom apa saja yang akan diambil
+            string * > fetch all column
+            string column_name > fetch mentioned column
+            list > fill with columns to be fetched
         @type tablename: str
         @param tablename: sebutkan nama tabel yang akan di-query
-        @type params: dict of dict
-        @param params: kondisi pencarian data
+        @type params: dict
+        @param params: WHERE statements
             dict terdiri dari key:
-                - logical (opsional untuk param ke-1): or|and
-                - conditions (list of tuple): index ke-1 harus diisi dengan tuple (logical, or|and)
-                    index dan ke-2 dst diisi dengan (nama_kolom, (nilai yang akan dicari, mode))
-                    mode >> baca query mode untuk mysql di _Config
+                - logical (optional/ignored on first params) -> or|and
+                - conditions (list of tuple): first(0) index must be filled with tuple (logical, or|and)
+                    second(1 and go on) index must be filled with tuple(column_name, (search value, mode))
+                    mode >> read query mode for mysql in _Config class
         """
         cursor = self.connect(db_engine=_Config.db_engines['MYSQL']).cursor()
 
